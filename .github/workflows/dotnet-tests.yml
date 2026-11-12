@@ -1,0 +1,22 @@
+name: .NET tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Run AI QA unit tests
+        run: dotnet test tests/SdetPortfolio.AiQa.Tests/SdetPortfolio.AiQa.Tests.csproj --configuration Release
