@@ -1,0 +1,32 @@
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+
+## Test output
+TestResults/
+coverage/
+*.trx
+
+## IDEs
+.idea/
+.vscode/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Local configuration and secrets
+.env
+.env.*
+!.env.example
+appsettings.Local.json
