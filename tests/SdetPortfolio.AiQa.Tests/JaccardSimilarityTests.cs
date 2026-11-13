@@ -11,15 +11,14 @@ public class JaccardSimilarityTests
     {
         var jaccard = new JaccardSimilarity();
         var result = jaccard.Calculate("login password", "login password");
-        Assert.That(1.0, Is.EqualTo(result));
-    }
+        Assert.That(result, Is.EqualTo(1.0));    }
     
     [Test]
     public void ShouldReturnPointThreeThree_WhenOneWordMatches()
     {
         var jaccard = new JaccardSimilarity();
         var result = jaccard.Calculate("login password", "login username");
-        Assert.That(0.3333333333333333, Is.EqualTo(result));
+        Assert.That(result, Is.EqualTo(0.3333333333333333));
     }       
 
     [Test]
@@ -27,7 +26,7 @@ public class JaccardSimilarityTests
     {
         var jaccard = new JaccardSimilarity();
         var result = jaccard.Calculate("apple", "orange");
-        Assert.That(0.0, Is.EqualTo(result));
+        Assert.That(result, Is.EqualTo(0.0));
     }
 
     [Test]
@@ -35,7 +34,7 @@ public class JaccardSimilarityTests
     {
         var jaccard = new JaccardSimilarity();
         var result = jaccard.Calculate("", "");
-        Assert.That(0.0, Is.EqualTo(result));
+        Assert.That(result, Is.EqualTo(0.0));
     }
 
     [Test]
@@ -43,6 +42,6 @@ public class JaccardSimilarityTests
     {
         var jaccard = new JaccardSimilarity();
         var result = jaccard.Calculate("  login   password  ", "login password");
-        Assert.That(1.0, Is.EqualTo(result));
+        Assert.That(result, Is.EqualTo(1.0));
     }
 }
