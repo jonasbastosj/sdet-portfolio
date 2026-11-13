@@ -11,7 +11,7 @@ public class JaccardSimilarityTests
     {
         var jaccard = new JaccardSimilarity();
         var result = jaccard.Calculate("login password", "login password");
-        Assert.Equals(1.0, result);
+        Assert.That(1.0, Is.EqualTo(result));
     }
     
     [Test]
@@ -19,27 +19,30 @@ public class JaccardSimilarityTests
     {
         var jaccard = new JaccardSimilarity();
         var result = jaccard.Calculate("login password", "login username");
-        Assert.Equals(0.3333333333333333, result);
+        Assert.That(0.3333333333333333, Is.EqualTo(result));
     }       
 
+    [Test]
     public void ShouldReturnZero_WhenTextsAreDifferent()
     {
         var jaccard = new JaccardSimilarity();
         var result = jaccard.Calculate("apple", "orange");
-        Assert.Equals(0.0, result);
+        Assert.That(0.0, Is.EqualTo(result));
     }
 
+    [Test]
     public void ShouldReturnZero_WhenTextsAreEmpty()
     {
         var jaccard = new JaccardSimilarity();
         var result = jaccard.Calculate("", "");
-        Assert.Equals(0.0, result);
+        Assert.That(0.0, Is.EqualTo(result));
     }
 
+    [Test]
     public void ShouldReturnOne_WhenTextsHaveExtraSpaces()
     {
         var jaccard = new JaccardSimilarity();
-        var result = jaccard.Calculate("login password", "login password");
-        Assert.Equals(1.0, result);
+        var result = jaccard.Calculate("  login   password  ", "login password");
+        Assert.That(1.0, Is.EqualTo(result));
     }
 }
