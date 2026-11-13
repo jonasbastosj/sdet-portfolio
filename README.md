@@ -24,7 +24,7 @@ The `SdetPortfolio.AiQa` component sends a user story to an OpenAI-compatible ch
 - No execution of AI-generated code or test steps.
 - Unit tests use a stub HTTP handler, so they do not require an API key or network access.
 
-AI-generated cases are suggestions. A QA engineer must review them for correctness, coverage, and product risk before using them.
+AI-generated cases are suggestions. A deterministic structural evaluator checks that required fields and steps are present. This is not a semantic quality score: a QA engineer must still review relevance, coverage, clarity, verifiability, and factual accuracy against the actual requirements before using a test case.
 
 ## Technology
 
@@ -94,7 +94,7 @@ Keep API keys in environment variables or a secret manager. Never commit credent
 
 - [x] Implement an AI-assisted test case generator.
 - [x] Add deterministic unit tests for valid and invalid provider responses.
-- [ ] Add prompt-injection and malformed-response test coverage.
+- [ ] Add prompt-injection and malformed-response test coverage.\n- [x] Add deterministic structural checks for generated test cases.\n- [ ] Add semantic evaluation with a human-reviewed golden dataset.
 - [ ] Add a small UI automation suite with Selenium.
 - [ ] Add BDD scenarios with Reqnroll and NUnit.
 - [ ] Add REST API tests using HttpClient.
