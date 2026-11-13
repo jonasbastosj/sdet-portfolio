@@ -21,6 +21,6 @@ public class JaccardSimilarity
             return 0.0; // Avoid division by zero
         }
 
-        return (double)intersection / union;
+        return (double)intersection / union;        
 	}
 }
