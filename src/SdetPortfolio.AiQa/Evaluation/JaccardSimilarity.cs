@@ -7,11 +7,11 @@ public class JaccardSimilarity
 {
 	public double Calculate(string textA, string textB)
 	{
-		textA = textA.ToLower();
-        textB = textB.ToLower();
+		textA = textA.ToLowerInvariant();
+        textB = textB.ToLowerInvariant();
 
-        var setA = textA.Split(' ').ToHashSet();
-        var setB = textB.Split(' ').ToHashSet();
+        var setA = textA.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
+        var setB = textB.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
 
         var intersection = setA.Intersect(setB).Count();
         var union = setA.Union(setB).Count();
