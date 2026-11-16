@@ -67,29 +67,30 @@ public sealed class AiTestCaseGeneratorTests
     [Test]
     public async Task GenerateAsync_WhenJsonPropertiesHaveUppercase_ReturnsTestCases()
     {
+        
         const string providerResponse = """
         {
-        "choices": [
-            {
+        "choices": [{
             "message": {
-                "content": "..."
+            "content": "{\"TESTCASES\":[{\"TITLE\":\"Reject invalid password\",\"OBJECTIVE\":\"Verify authentication validation\",\"PRECONDITIONS\":\"A registered user exists\",\"STEPS\":[\"Open login page\",\"Enter invalid password\"],\"EXPECTEDRESULT\":\"Access is denied\",\"PRIORITY\":\"High\"}]}"
             }
-            }           
-        ]
+        }]
         }
         """;
 
-using var client = new HttpClient(
-    new StubHttpMessageHandler(providerResponse));
-var generator = new AiTestCaseGenerator(
-    client,
-    new AiTestCaseGeneratorOptions(
-        "https://api.example.test/v1",
-        "test-key",
-        "test-model"));
+        using var client = new HttpClient(
+            new StubHttpMessageHandler(providerResponse));
+        var generator = new AiTestCaseGenerator(
+            client,
+            new AiTestCaseGeneratorOptions(
+                "https://api.example.test/v1",
+                "test-key",
+                "test-model"));
 
-        var result = await generator.GenerateAsync(
-    "As a user, I want to sign in securely.");
+                var result = await generator.GenerateAsync(
+            "As a user, I want to sign in securely.");
+            Assert.That(result, Has.Count.EqualTo(1));
+            Assert.That(result[0].Title, Is.EqualTo("Reject invalid password"));
     }
     
 
