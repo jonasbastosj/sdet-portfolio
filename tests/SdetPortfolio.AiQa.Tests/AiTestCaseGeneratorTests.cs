@@ -64,6 +64,22 @@ public sealed class AiTestCaseGeneratorTests
         Assert.ThrowsAsync<InvalidOperationException>(
             () => generator.GenerateAsync("As a user, I want to sign in."));
     }
+    [Test]
+    public async Task GenerateAsync_WhenJsonPropertiesHaveUppercase_ReturnsTestCases()
+    {
+        const string providerResponse = """
+        {
+        "choices": [
+            {
+            "message": {
+                "content": "..."
+            }
+            }           
+        ]
+        }
+        """;
+    }
+    
 
     private sealed class StubHttpMessageHandler(string responseBody) : HttpMessageHandler
     {
