@@ -78,6 +78,18 @@ public sealed class AiTestCaseGeneratorTests
         ]
         }
         """;
+
+using var client = new HttpClient(
+    new StubHttpMessageHandler(providerResponse));
+var generator = new AiTestCaseGenerator(
+    client,
+    new AiTestCaseGeneratorOptions(
+        "https://api.example.test/v1",
+        "test-key",
+        "test-model"));
+
+        var result = await generator.GenerateAsync(
+    "As a user, I want to sign in securely.");
     }
     
 
