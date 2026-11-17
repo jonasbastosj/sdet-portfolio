@@ -51,7 +51,13 @@ public sealed class FaithfulnessEvaluatorTests
     [Test]
     public void EvaluateAsync_WhenProviderReturns500_ThrowsHttpRequestException()
     {
-        
+        using var client = new HttpClient(new StubHttpMessageHandler("{}", "500"));
+        var evaluator = new FaithfulnessEvaluator(
+            client,
+            new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
+
+        Assert.ThrowsAsync<HttpRequestException>(
+            () => evaluator.EvaluateAsync("A requirement.", "A generated test."));
 
     }
 
