@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using NUnit.Framework;
 using SdetPortfolio.AiQa;
 using SdetPortfolio.AiQa.Evaluation;
@@ -62,7 +63,7 @@ public sealed class FaithfulnessEvaluatorTests
     }
 
     [Test]
-    public void EvaluateAsync_WhenJsonIsInvalid_RejectsResponse()
+    public void EvaluateAsync_WhenJsonIsInvalid()
     {
         const string providerResponse = """
             {
@@ -79,9 +80,12 @@ public sealed class FaithfulnessEvaluatorTests
             client,
             new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
 
-        Assert.ThrowsAsync<InvalidOperationException>(
+ 
+        var response = Assert.ThrowsAsync<InvalidOperationException>(
             () => evaluator.EvaluateAsync("A requirement.", "A generated test."));
-    }
+
+        Assert.That(response.Message, Does.Contain("invalid json"));
+
 
     [Test]
     public void EvaluateAsync_WhenConfidenceIsOutsideAllowedRange_RejectsResponse()
