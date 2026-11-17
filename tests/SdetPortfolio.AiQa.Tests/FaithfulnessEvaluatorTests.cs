@@ -63,7 +63,7 @@ public sealed class FaithfulnessEvaluatorTests
     }
 
     [Test]
-    public void EvaluateAsync_WhenJsonIsInvalid()
+    public void EvaluateAsync_WhenProviderReturnsInvalidJson_ThrowsInvalidOperationException()
     {
         const string providerResponse = """
             {
@@ -81,11 +81,12 @@ public sealed class FaithfulnessEvaluatorTests
             new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
 
  
-        var response = Assert.ThrowsAsync<InvalidOperationException>(
+        var result = Assert.ThrowsAsync<InvalidOperationException>(
             () => evaluator.EvaluateAsync("A requirement.", "A generated test."));
 
-        Assert.That(response.Message, Does.Contain("invalid json"));
-
+        Assert.That(result.Message, Does.Contain("invalid json"));
+        Assert.That(result.InnerException, Is.TypeOf<JsonException>());
+    }
 
     [Test]
     public void EvaluateAsync_WhenConfidenceIsOutsideAllowedRange_RejectsResponse()
