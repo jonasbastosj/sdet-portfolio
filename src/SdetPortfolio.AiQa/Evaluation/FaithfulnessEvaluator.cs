@@ -89,31 +89,32 @@ public sealed class FaithfulnessEvaluator(
         using var response = await httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        using var responseJson = await JsonDocument.ParseAsync(
-            await response.Content.ReadAsStreamAsync(cancellationToken),
-            cancellationToken: cancellationToken);
-
-        if (!responseJson.RootElement.TryGetProperty("choices", out var choices) ||
-            choices.ValueKind != JsonValueKind.Array ||
-            choices.GetArrayLength() == 0 ||
-            !choices[0].TryGetProperty("message", out var message) ||
-            !message.TryGetProperty("content", out var contentElement))
-        {
-            throw new InvalidOperationException("The AI provider returned an invalid chat-completion response.");
-        }
-
-        var content = contentElement.GetString();
-        if (string.IsNullOrWhiteSpace(content))
-            throw new InvalidOperationException("The AI provider returned an empty evaluation.");
-
         FaithfulnessResult? result;
+
         try
         {
+            using var responseJson = await JsonDocument.ParseAsync(
+                await response.Content.ReadAsStreamAsync(cancellationToken),
+                cancellationToken: cancellationToken);
+
+            if (!responseJson.RootElement.TryGetProperty("choices", out var choices) ||
+                choices.ValueKind != JsonValueKind.Array ||
+                choices.GetArrayLength() == 0 ||
+                !choices[0].TryGetProperty("message", out var message) ||
+                !message.TryGetProperty("content", out var contentElement))
+            {
+                throw new InvalidOperationException("The AI provider returned an invalid chat-completion response.");
+            }
+
+            var content = contentElement.GetString();
+            if (string.IsNullOrWhiteSpace(content))
+                throw new InvalidOperationException("The AI provider returned an empty evaluation.");
+
             result = JsonSerializer.Deserialize<FaithfulnessResult>(content, JsonOptions);
         }
         catch (JsonException exception)
         {
-            throw new InvalidOperationException("The AI provider returned invalid faithfulness-evaluation JSON.", exception);
+            throw new InvalidOperationException("The AI provider returned invalid JSON.", exception);
         }
 
         Validate(result);
