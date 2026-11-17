@@ -94,20 +94,10 @@ public sealed class FaithfulnessEvaluatorTests
                 Is.EqualTo("https://api.example.test/v1/chat/completions"));
             Assert.That(request.Headers.Authorization?.Scheme, Is.EqualTo("Bearer"));
 
-            if (responseStatusCode == HttpStatusCode.OK)
+            return Task.FromResult(new HttpResponseMessage(responseStatusCode)
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(responseBody, Encoding.UTF8, "application/json")
-                });
-            }
-            else
-            {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                {
-                    Content = new StringContent(responseBody, Encoding.UTF8, "application/json")
-                });
-            }
+                Content = new StringContent(responseBody, Encoding.UTF8, "application/json")
+            });
         }
     }
 }
