@@ -22,7 +22,7 @@ public sealed class FaithfulnessEvaluatorTests
             }
             """;
 
-        using var client = new HttpClient(new StubHttpMessageHandler(providerResponse));
+        using var client = new HttpClient(new StubHttpMessageHandler(providerResponse, "OK"));
         var evaluator = new FaithfulnessEvaluator(
             client,
             new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
@@ -39,13 +39,20 @@ public sealed class FaithfulnessEvaluatorTests
     [Test]
     public void EvaluateAsync_WhenRequirementIsEmpty_ThrowsBeforeCallingProvider()
     {
-        using var client = new HttpClient(new StubHttpMessageHandler("{}"));
+        using var client = new HttpClient(new StubHttpMessageHandler("{}", "OK"));
         var evaluator = new FaithfulnessEvaluator(
             client,
             new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
 
         Assert.ThrowsAsync<ArgumentException>(
             () => evaluator.EvaluateAsync(" ", "A generated test."));
+    }
+
+    [Test]
+    public void EvaluateAsync_WhenProviderReturns500_ThrowsHttpRequestException()
+    {
+        
+
     }
 
     [Test]
@@ -61,7 +68,7 @@ public sealed class FaithfulnessEvaluatorTests
             }
             """;
 
-        using var client = new HttpClient(new StubHttpMessageHandler(providerResponse));
+        using var client = new HttpClient(new StubHttpMessageHandler(providerResponse, "OK"));
         var evaluator = new FaithfulnessEvaluator(
             client,
             new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
@@ -70,7 +77,7 @@ public sealed class FaithfulnessEvaluatorTests
             () => evaluator.EvaluateAsync("A requirement.", "A generated test."));
     }
 
-    private sealed class StubHttpMessageHandler(string responseBody) : HttpMessageHandler
+    private sealed class StubHttpMessageHandler(string responseBody, string responseStatusCode) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
@@ -81,10 +88,20 @@ public sealed class FaithfulnessEvaluatorTests
                 Is.EqualTo("https://api.example.test/v1/chat/completions"));
             Assert.That(request.Headers.Authorization?.Scheme, Is.EqualTo("Bearer"));
 
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            if (responseStatusCode == "OK")
             {
-                Content = new StringContent(responseBody, Encoding.UTF8, "application/json")
-            });
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(responseBody, Encoding.UTF8, "application/json")
+                });
+            }
+            else
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                {
+                    Content = new StringContent(responseBody, Encoding.UTF8, "application/json")
+                });
+            }
         }
     }
 }
