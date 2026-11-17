@@ -62,6 +62,28 @@ public sealed class FaithfulnessEvaluatorTests
     }
 
     [Test]
+    public void EvaluateAsync_WhenJsonIsInvalid_RejectsResponse()
+    {
+        const string providerResponse = """
+            {
+              "choices": [{
+                "message": {
+                  "content": "{\"isFaithful\":true,\"reason\":\"Looks correct.\",\"confidence\":1.5}"
+                
+              }]
+            }
+            """;
+
+        using var client = new HttpClient(new StubHttpMessageHandler(providerResponse, HttpStatusCode.OK));
+        var evaluator = new FaithfulnessEvaluator(
+            client,
+            new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
+
+        Assert.ThrowsAsync<InvalidOperationException>(
+            () => evaluator.EvaluateAsync("A requirement.", "A generated test."));
+    }
+
+    [Test]
     public void EvaluateAsync_WhenConfidenceIsOutsideAllowedRange_RejectsResponse()
     {
         const string providerResponse = """
