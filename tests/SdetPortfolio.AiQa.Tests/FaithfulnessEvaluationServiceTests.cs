@@ -48,6 +48,42 @@ public sealed class FaithfulnessEvaluationServiceTests
         Assert.That(report.Decision, Is.EqualTo(FaithfulnessDecision.Fail));
     }
 
+    [Test]
+public async Task EvaluateAsync_WhenTestIsFaithful_ReturnsPassReport()
+{
+    const string providerResponse = """
+        {
+          "choices": [{
+            "message": {
+              "content": "{\"isFaithful\":true,\"reason\":\"The test correctly represents the requirement.\",\"confidence\":0.95}"
+            }
+          }]
+        }
+        """;
+
+    using var client = new HttpClient(
+        new StubHttpMessageHandler(providerResponse));
+
+    var evaluator = new FaithfulnessEvaluator(
+        client,
+        new AiTestCaseGeneratorOptions(
+            "https://api.example.test/v1",
+            "test-key",
+            "test-model"));
+
+    var service = new FaithfulnessEvaluationService(
+        evaluator,
+        new FaithfulnessDecisionEvaluator());
+
+    var report = await service.EvaluateAsync(
+        "Passwords must contain at least 12 characters.",
+        "Verify that passwords with 12 characters are accepted.");
+
+    Assert.That(report.IsFaithful, Is.True);
+    Assert.That(report.Confidence, Is.EqualTo(0.95));
+    Assert.That(report.Decision, Is.EqualTo(FaithfulnessDecision.Pass));
+}
+
     private sealed class StubHttpMessageHandler(string responseBody) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(
