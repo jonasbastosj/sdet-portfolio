@@ -59,18 +59,32 @@ public sealed class FaithfulnessEvaluatorTests
 
         Assert.ThrowsAsync<HttpRequestException>(
             () => evaluator.EvaluateAsync("A requirement.", "A generated test."));
-
     }
 
     [Test]
-    public void EvaluateAsync_WhenJsonIsInvalid()
+    public void EvaluateAsync_WhenProviderReturnsInvalidResponseJson_ThrowsInvalidOperationExceptionWithJsonException()
+    {
+        using var client = new HttpClient(new StubHttpMessageHandler("{ invalid json", HttpStatusCode.OK));
+        var evaluator = new FaithfulnessEvaluator(
+            client,
+            new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
+
+        var exception = Assert.ThrowsAsync<InvalidOperationException>(
+            () => evaluator.EvaluateAsync("A requirement.", "A generated test."));
+
+        Assert.That(exception!.Message, Does.Contain("invalid JSON"));
+        Assert.That(exception.InnerException, Is.InstanceOf<JsonException>());
+    }
+
+    [Test]
+    public void EvaluateAsync_WhenProviderReturnsInvalidEvaluationJson_ThrowsInvalidOperationExceptionWithJsonException()
     {
         const string providerResponse = """
             {
               "choices": [{
                 "message": {
-                  "content": "{\"isFaithful\":true,\"reason\":\"Looks correct.\",\"confidence\":1.5}"
-                
+                  "content": "not-json"
+                }
               }]
             }
             """;
@@ -80,12 +94,12 @@ public sealed class FaithfulnessEvaluatorTests
             client,
             new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
 
- 
-        var response = Assert.ThrowsAsync<InvalidOperationException>(
+        var exception = Assert.ThrowsAsync<InvalidOperationException>(
             () => evaluator.EvaluateAsync("A requirement.", "A generated test."));
 
-        Assert.That(response.Message, Does.Contain("invalid json"));
-
+        Assert.That(exception!.Message, Does.Contain("invalid JSON"));
+        Assert.That(exception.InnerException, Is.InstanceOf<JsonException>());
+    }
 
     [Test]
     public void EvaluateAsync_WhenConfidenceIsOutsideAllowedRange_RejectsResponse()
