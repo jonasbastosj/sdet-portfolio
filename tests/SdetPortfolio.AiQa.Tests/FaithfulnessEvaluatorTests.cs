@@ -22,7 +22,7 @@ public sealed class FaithfulnessEvaluatorTests
             }
             """;
 
-        using var client = new HttpClient(new StubHttpMessageHandler(providerResponse, "OK"));
+        using var client = new HttpClient(new StubHttpMessageHandler(providerResponse, HttpStatusCode.OK));
         var evaluator = new FaithfulnessEvaluator(
             client,
             new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
@@ -39,7 +39,7 @@ public sealed class FaithfulnessEvaluatorTests
     [Test]
     public void EvaluateAsync_WhenRequirementIsEmpty_ThrowsBeforeCallingProvider()
     {
-        using var client = new HttpClient(new StubHttpMessageHandler("{}", "OK"));
+        using var client = new HttpClient(new StubHttpMessageHandler("{}", HttpStatusCode.OK));
         var evaluator = new FaithfulnessEvaluator(
             client,
             new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
@@ -51,7 +51,7 @@ public sealed class FaithfulnessEvaluatorTests
     [Test]
     public void EvaluateAsync_WhenProviderReturns500_ThrowsHttpRequestException()
     {
-        using var client = new HttpClient(new StubHttpMessageHandler("{}", "500"));
+        using var client = new HttpClient(new StubHttpMessageHandler("{}", HttpStatusCode.InternalServerError));
         var evaluator = new FaithfulnessEvaluator(
             client,
             new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
@@ -74,7 +74,7 @@ public sealed class FaithfulnessEvaluatorTests
             }
             """;
 
-        using var client = new HttpClient(new StubHttpMessageHandler(providerResponse, "OK"));
+        using var client = new HttpClient(new StubHttpMessageHandler(providerResponse, HttpStatusCode.OK));
         var evaluator = new FaithfulnessEvaluator(
             client,
             new AiTestCaseGeneratorOptions("https://api.example.test/v1", "test-key", "test-model"));
@@ -83,7 +83,7 @@ public sealed class FaithfulnessEvaluatorTests
             () => evaluator.EvaluateAsync("A requirement.", "A generated test."));
     }
 
-    private sealed class StubHttpMessageHandler(string responseBody, string responseStatusCode) : HttpMessageHandler
+    private sealed class StubHttpMessageHandler(string responseBody, HttpStatusCode responseStatusCode) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
@@ -94,7 +94,7 @@ public sealed class FaithfulnessEvaluatorTests
                 Is.EqualTo("https://api.example.test/v1/chat/completions"));
             Assert.That(request.Headers.Authorization?.Scheme, Is.EqualTo("Bearer"));
 
-            if (responseStatusCode == "OK")
+            if (responseStatusCode == HttpStatusCode.OK)
             {
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
