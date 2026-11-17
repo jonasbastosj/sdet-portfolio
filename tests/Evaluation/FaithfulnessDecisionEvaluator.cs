@@ -7,18 +7,13 @@ public sealed class FaithfulnessDecisionEvaluator
 
     public FaithfulnessDecision Evaluate(FaithfulnessResult result)
     {
-        if (result.IsFaithful && result.Confidence >= MinimumConfidence)
-        {
-            return FaithfulnessDecision.Pass;
-        }
-        else if (!result.IsFaithful && result.Confidence >= MinimumConfidence)
-        {
+        if (!result.IsFaithful)
             return FaithfulnessDecision.Fail;
-        }
-        else
-        {
-            return FaithfulnessDecision.Review;
-        }
+
+        if (result.Confidence >= MinimumConfidence)
+            return FaithfulnessDecision.Pass;
+
+        return FaithfulnessDecision.Review;
     }
 
 }
