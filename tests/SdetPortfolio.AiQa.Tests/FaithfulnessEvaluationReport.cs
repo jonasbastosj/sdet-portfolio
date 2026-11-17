@@ -1,12 +1,7 @@
-namespace SdetPortfolio.AiQa.Tests;
+namespace SdetPortfolio.AiQa.Evaluation;
 
-public sealed class FaithfulnessEvaluationReport
-{
-	public bool IsFaithful { get; init; }
-
-	public string Reason { get; init; } = string.Empty;
-
-	public double Confidence { get; init; }
-
-	public string Decision { get; init; } = string.Empty;
-}
+public sealed record FaithfulnessEvaluationReport(
+    bool IsFaithful,
+    string Reason,
+    double Confidence,
+    FaithfulnessDecision Decision);
