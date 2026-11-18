@@ -1,4 +1,5 @@
-﻿using SdetPortfolio.AiQa;
+using System.Net;
+using SdetPortfolio.AiQa;
 using SdetPortfolio.AiQa.Evaluation;
 
 var apiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY");
@@ -33,15 +34,42 @@ var evaluationService = new FaithfulnessEvaluationService(
     faithfulnessEvaluator,
     decisionEvaluator);
 
-const string userStory = """
-As a user, I want to create an account
-so that I can access the application.
+// Recebe a User Story pelo terminal
+Console.WriteLine("Enter the User Story:");
+Console.WriteLine("(Press Enter twice to finish)");
 
-The password must contain at least 12 characters.
-The email address must have a valid format.
-""";
+var lines = new List<string>();
+var consecutiveEmptyLines = 0;
 
-Console.WriteLine("Generating test cases with AI...");
+while (true)
+{
+    var line = Console.ReadLine();
+
+    if (string.IsNullOrEmpty(line))
+    {
+        consecutiveEmptyLines++;
+
+        if (consecutiveEmptyLines == 2)
+        {
+            break;
+        }
+    }
+    else
+    {
+        consecutiveEmptyLines = 0;
+        lines.Add(line);
+    }
+}
+
+var userStory = string.Join(Environment.NewLine, lines).Trim();
+
+if (string.IsNullOrWhiteSpace(userStory))
+{
+    Console.WriteLine("User Story cannot be empty.");
+    return;
+}
+
+Console.WriteLine("\nGenerating test cases with AI...");
 
 var testCases = await generator.GenerateAsync(userStory);
 
@@ -64,14 +92,24 @@ foreach (var testCase in testCases)
 
     Console.WriteLine("\nEvaluating test faithfulness...");
 
-    var report = await evaluationService.EvaluateAsync(
-        userStory,
-        generatedTest);
+    try
+    {
+        var report = await evaluationService.EvaluateAsync(
+            userStory,
+            generatedTest);
 
-    Console.WriteLine($"Faithful: {report.IsFaithful}");
-    Console.WriteLine($"Confidence: {report.Confidence}");
-    Console.WriteLine($"Decision: {report.Decision}");
-    Console.WriteLine($"Reason: {report.Reason}");
+        Console.WriteLine($"Faithful: {report.IsFaithful}");
+        Console.WriteLine($"Confidence: {report.Confidence}");
+        Console.WriteLine($"Decision: {report.Decision}");
+        Console.WriteLine($"Reason: {report.Reason}");
+    }
+    catch (HttpRequestException ex)
+        when (ex.StatusCode == HttpStatusCode.TooManyRequests)
+    {
+        Console.WriteLine("Faithful: Not evaluated");
+        Console.WriteLine("Decision: REVIEW");
+        Console.WriteLine("Reason: Groq API rate limit exceeded. Try again later.");
+    }
 }
 
 Console.WriteLine("\nAI QUALITY EVALUATION COMPLETED.");
